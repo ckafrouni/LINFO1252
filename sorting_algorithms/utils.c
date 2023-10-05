@@ -4,22 +4,30 @@
 
 void print_str_array(char **array, size_t nel)
 {
-    printf("{");
-    for (size_t i = 0; i < nel; i++)
+    printf("\033[1;36m[\033[0m"); // Cyan for opening bracket
+    for (size_t i = 0; i < nel; ++i)
     {
-        printf("%s, ", array[i]);
+        printf("\033[1;35m\"%s\"\033[0m", array[i]); // Purple for strings
+        if (i < nel - 1)
+        {
+            printf("\033[1;36m, \033[0m"); // Cyan for comma
+        }
     }
-    printf("}\n");
+    printf("\033[1;36m]\033[0m\n"); // Cyan for closing bracket
 }
 
 void print_int_array(int *array, size_t nel)
 {
-    printf("{");
-    for (size_t i = 0; i < nel; i++)
+    printf("\033[1;36m[\033[0m"); // Cyan for opening bracket
+    for (size_t i = 0; i < nel; ++i)
     {
-        printf("%d, ", array[i]);
+        printf("\033[1;31m%d\033[0m", array[i]); // Red for integers
+        if (i < nel - 1)
+        {
+            printf("\033[1;36m, \033[0m"); // Cyan for comma
+        }
     }
-    printf("}\n");
+    printf("\033[1;36m]\033[0m\n"); // Cyan for closing bracket
 }
 
 int compare_int(const void *x, const void *y)
