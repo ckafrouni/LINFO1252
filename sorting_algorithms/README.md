@@ -64,7 +64,7 @@ This repository contains implementations of common sorting algorithms, along wit
 
 - [x] [Bubble Sort](./bubblesort.c)
 - [x] [Selection Sort](./selectionsort.c)
-- [ ] [Insertion Sort](./insertionsort.c)
+- [x] [Insertion Sort](./insertionsort.c)
 - [ ] [Shell Sort](./shellsort.c)
 - [ ] [Merge Sort](./mergesort.c)
 - [x] [Quick Sort](./quicksort.c)
