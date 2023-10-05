@@ -4,7 +4,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
 
-%: %.c
+%: %.c main.c utils.c
 	$(CC) $(CFLAGS) -o $@.out $^
 
 clean:

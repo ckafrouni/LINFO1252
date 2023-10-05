@@ -43,4 +43,12 @@
     - Repeatedly swap adjacent elements if they are in wrong order.
     - The pass through the list is repeated until the list is sorted.
     - The algorithm gets its name from the way smaller or larger elements "bubble" to the top of the list.
-  
+
+---
+Algorithms ordered by implementation complexity:
+- Bubble Sort
+- Selection Sort
+- Insertion Sort
+- Shell Sort
+- Merge Sort
+- Quick Sort
