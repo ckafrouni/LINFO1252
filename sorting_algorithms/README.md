@@ -60,14 +60,6 @@ This repository contains implementations of common sorting algorithms, along wit
 - Merge Sort
 - Quick Sort
 
-## Algorithms Ordered by Implementation Complexity (General Guideline)
-- Bubble Sort
-- Selection Sort
-- Insertion Sort
-- Shell Sort
-- Merge Sort
-- Quick Sort
-
 ## TODO Checklist for Implementation
 
 - [x] [Bubble Sort](./bubblesort.c)
