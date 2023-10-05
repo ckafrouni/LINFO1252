@@ -5,7 +5,7 @@
 
 void sort(void *base, size_t nel, size_t width, int (*compar)(const void *, const void *));
 
-int main(int argc, char **argv)
+int main(int /* argc */, char **/* argv */)
 {
     char *str_base[9] = {"abc", "bak", "k", "abc", "aA", "m", "L", "a", "j"};
     size_t nel1 = 9;
