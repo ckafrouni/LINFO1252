@@ -2,7 +2,7 @@
 # usage: make [target]
 
 CC=gcc
-CFLAGS=-Wall -Wextra
+CFLAGS=-Wall -Wextra -ggdb
 
 %: %.c main.c utils.c
 	$(CC) $(CFLAGS) -o $@.out $^
