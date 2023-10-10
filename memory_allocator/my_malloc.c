@@ -6,6 +6,16 @@
 #include "my_malloc.h"
 
 /**
+ * ATTENTION:
+ *   - I don't really understand when to step using offsets from MY_HEAP
+ *     and when I can just add 1 from the current block.
+ *
+ *   - How do I test this ?
+ *
+ *   - Where should I define my constants ? Should I redifine them at the start of each function ?
+ */
+
+/**
  * This heap is build as a doubly linked, explicit list.
  *
  * Explicit list, meaning each free block points towards the next free block.
@@ -42,7 +52,7 @@ void my_init()
 
 void *my_malloc(size_t size)
 {
-    size +=  2 * WORD; // Additional words for metadata
+    size += 2 * WORD; // Additional words for metadata
 
     uint16_t *start = (uint16_t *)MY_HEAP;
     uint16_t *current = (uint16_t *)(MY_HEAP + *start);
