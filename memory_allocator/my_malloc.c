@@ -1,66 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "my_malloc.h"
 
-// Define the block header structure here if you're using one
-// Or define macros/constants for bit manipulation
+/**
+ * This heap is build as a doubly linked, explicit list.
+ *
+ * Explicit list, meaning each free block points towards the next free block.
+ * Unlike implicit list, where every block points to the next, wether it is free, or not.
+ *
+ * Doubly linked, meaning each block starts and ends with a metadata word. Allowing traversing both ways.
+ * Free block contain on top of that, two extra words, one containing a pointer to the next free block, and
+ * another containing a pointer towards the previous free block.
+ * --
+ * Our heap size is 64 [kb], and we chose 2 [byte] length words.
+ * --
+ * The heap starts with a word that points towards the first free block.
+ */
 
-// The heap size
-#define HEAP_SIZE 64000
-#define WORD_SIZE sizeof(size_t)
+#define HEAP_SIZE 64000 // Amount of bytes
+#define WORD 2          // Words are 2 bytes long
+#define MIN_BLOCK_SIZE 4 * WORD
 
-// The heap itself
-static uint8_t MY_HEAP[HEAP_SIZE];
+uint8_t MY_HEAP[64000];
 
-// Initialize the memory allocator
-void init()
+void my_init()
 {
-    // We cast to (size_t *) in order to select WORD_SIZE bytes
-    *((size_t *)MY_HEAP) = HEAP_SIZE;         // (bloc size & allocated flag) - 64000 & FREE
-    *((size_t *)MY_HEAP + WORD_SIZE) = 0;     // (prev pointer) - NULL
-    *((size_t *)MY_HEAP + 2 * WORD_SIZE) = 0; // (next pointer) - NULL
+    // Initialize start block to point to 1st free block
+    uint16_t *start = (uint16_t *)MY_HEAP;
+    *start = WORD;
+
+    uint16_t *block = (uint16_t *)(MY_HEAP + 1 * WORD);
+    uint16_t block_size = HEAP_SIZE - 1 * WORD;
+    *block = block_size;               // 1st: block size (in bytes)
+    *(block + 1 * WORD) = 0;           // 2nd: ptr to next free block (here: null)
+    *(block + 2 * WORD) = 0;           // 3rd: ptr to previous free block
+    *(block + *block - WORD) = *block; // last: = 1st
 }
 
-// Allocate a block of memory of the given size
 void *my_malloc(size_t size)
 {
-    // TODO - work in progress, I feel I didn't really make use of next, and prev pointer yet.
+    size +=  2 * WORD; // Additional words for metadata
 
-    // Align to next word & add 2 more for header and footer
-    size = (size + WORD_SIZE - 1) & ~(WORD_SIZE - 1);
-    size += 2 * WORD_SIZE;
+    uint16_t *start = (uint16_t *)MY_HEAP;
+    uint16_t *current = (uint16_t *)(MY_HEAP + *start);
 
-    size_t *current = (size_t *)MY_HEAP;
-    while (current < MY_HEAP + HEAP_SIZE)
+    while (current != NULL)
     {
-        size_t current_size = *current & ~1;
-        int allocated_flag = *current & 1;
-
-        if (!allocated_flag && current_size >= size) 
+        uint16_t block_size = *current;
+        if (block_size >= size)
         {
-            // We found a seemingly suitable spot.
-            // We just need to split if a free block can fit (needs 4 words)
-            if (current_size >= 4 * WORD_SIZE)
+            uint16_t remaining_size = block_size - size;
+            uint16_t *new_block;
+
+            if (remaining_size >= MIN_BLOCK_SIZE)
             {
-                // TODO
+                // Split block
+                new_block = current + size;
+                *new_block = remaining_size;
+                *(new_block + 1 * WORD) = *(current + 1 * WORD);
+                *(new_block + 2 * WORD) = *(current + 2 * WORD);
+                *(new_block + *new_block - WORD) = *new_block;
             }
 
-            *current = *current | 1;
-            return current + WORD_SIZE;
+            // Update current block
+            *current = size;
+            *(current + size - WORD) = size;
+
+            // CETTE PARTIE VIENT DE CHATGPT
+            // Update previous block's next pointer
+            // uint16_t previous_offset = *(current + 2 * WORD);
+            // if (previous_offset)
+            // {
+            //     uint16_t *previous = (uint16_t *)(MY_HEAP + previous_offset);
+            //     *(previous + 1 * WORD) = (uint8_t *)new_block ? (uint8_t *)new_block - MY_HEAP : 0;
+            // }
+            // Update next block's previous pointer
+            // uint16_t next_offset = *(current + 1 * WORD);
+            // if (next_offset)
+            // {
+            //     uint16_t *next = (uint16_t *)(MY_HEAP + next_offset);
+            //     *(next + 2 * WORD) = (uint8_t *)new_block ? (uint8_t *)new_block - MY_HEAP : 0;
+            // }
+
+            return (void *)(current + 1 * WORD);
         }
 
-        current = current + (current_size / WORD_SIZE);
+        current = *(current + 1 * WORD);
     }
-    
 
     return NULL;
-}
-
-// Free a previously allocated block of memory
-void my_free(void *ptr)
-{
-    // Freeing code here
-    // For example, insert the block back into the free list and
-    // coalesce adjacent free blocks
 }
