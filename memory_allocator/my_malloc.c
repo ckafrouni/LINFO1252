@@ -30,28 +30,30 @@
  * The heap starts with a word that points towards the first free block.
  */
 
-#define HEAP_SIZE 64000 // Amount of bytes
-#define WORD 2          // Words are 2 bytes long
-#define MIN_BLOCK_SIZE 4 * WORD
-
 uint8_t MY_HEAP[64000];
 
 void my_init()
 {
+    const uint16_t METADATA_SIZE = 2;
+    const uint16_t HEAP_SIZE = 64000;
+
     // Initialize start block to point to 1st free block
     uint16_t *start = (uint16_t *)MY_HEAP;
-    *start = WORD;
+    uint16_t *block = (uint16_t *)(MY_HEAP + 1 * METADATA_SIZE);
 
-    uint16_t *block = (uint16_t *)(MY_HEAP + 1 * WORD);
-    uint16_t block_size = HEAP_SIZE - 1 * WORD;
-    *block = block_size;               // 1st: block size (in bytes)
-    *(block + 1 * WORD) = 0;           // 2nd: ptr to next free block (here: null)
-    *(block + 2 * WORD) = 0;           // 3rd: ptr to previous free block
-    *(block + *block - WORD) = *block; // last: = 1st
+    *start = METADATA_SIZE;
+
+    uint16_t block_size = HEAP_SIZE - 1 * METADATA_SIZE;
+    *(block + 0) = block_size;                    // block size (in bytes)
+    *(block + 1) = 0;                             // ptr to next free block (here: null)
+    *(block + 2) = 0;                             // ptr to previous free block
+    *(block + (block_size / 2) - 1) = block_size; // last: = 1st
 }
 
 void *my_malloc(size_t size)
 {
+    const uint16_t WORD = 2;
+    const uint16_t MIN_BLOCK_SIZE = 4 * WORD;
     size += 2 * WORD; // Additional words for metadata
 
     uint16_t *start = (uint16_t *)MY_HEAP;
@@ -80,8 +82,10 @@ void *my_malloc(size_t size)
             *(current + size - WORD) = size;
 
             // Update previous block's next pointer
+            // TODO
 
             // Update next block's previous pointer
+            // TODO
 
             return (void *)(current + 1 * WORD);
         }
