@@ -31,8 +31,7 @@ void print_all_blocks()
         else
         {
             uint16_t next_offset = *(current + 1);
-            uint16_t prev_offset = *(current + 2);
-            printf("\033[32mfree\t\toffset = %u\t%%p = %p\tsize = %u\tnext offset = %u\tprev offset = %u\n\033[0;1m", offset, current, size, next_offset, prev_offset);
+            printf("\033[32mfree\t\toffset = %u\t%%p = %p\tsize = %u\tnext offset = %u\n\033[0;1m", offset, current, size, next_offset);
         }
 
         num_block++;
@@ -47,17 +46,23 @@ int main()
     my_init();
     print_all_blocks();
 
-    char *p = (char *)my_malloc(5);
+    char *p = (char *)my_malloc(6);
     print_all_blocks();
     strcpy(p, "Hello");
     print_all_blocks();
 
-    char *q = (char *)my_malloc(6);
+    char *q = (char *)my_malloc(7);
     strcpy(q, "world!");
     print_all_blocks();
 
-    char *pq = (char *)my_malloc(11);
+    char *pq = (char *)my_malloc(12);
     sprintf(pq, "%s %s", p, q);
+    print_all_blocks();
+
+    my_free(p);
+    print_all_blocks();
+
+    my_free(q);
     print_all_blocks();
 
     my_init();
