@@ -44,17 +44,17 @@ void *my_malloc(size_t size)
         if (block_size >= size)
         {
             uint16_t remaining_size = block_size - size;
-            uint16_t *new_block;
+            uint16_t *new_block = NULL;
 
             if (remaining_size >= MIN_BLOCK_SIZE)
             {
                 // Split block
                 new_block = current + (size / 2);
                 *(new_block + 0) = remaining_size;
-                *(new_block + 1) = *(current + 1); // offset to next free block
+                *(new_block + 1) = *(current + 1) == 0 ? 0 : *(current + 1) - size; // offset to next free block
                 *(new_block + (remaining_size / 2) - 1) = remaining_size;
             }
-            else
+            else if (remaining_size != 0)
             {
                 // Create unusable block, to be reclaimed by free later
                 uint16_t *block = current + (size / 2);
@@ -67,7 +67,7 @@ void *my_malloc(size_t size)
 
             if (prev == NULL)
             {
-                *start = new_block == NULL ? *(current + 1) : (uint8_t *)new_block - MY_HEAP; // offset from MY_HEAP
+                *start = new_block == NULL ? *start + *(current + 1) : (uint8_t *)new_block - MY_HEAP; // offset from MY_HEAP
             }
             else
             {
@@ -90,27 +90,11 @@ void *my_malloc(size_t size)
 
 void my_free(void *pointer)
 {
-    // Find the first previous free space
-    //      if previous is adjacent => merge
-    //          Change size of previous: previous += current
-    //          Wait to point to next with the 'next pointer' of the previous => current becomes previous
-    //      else
-    //          Point to the head of previous
-    //          Change 'next pointer' of previous to current
-
-    // Find the next free space
-    //      if next is adjacent => merge
-    //          Change size of current: current += next
-    //          Change 'next pointer' of current with the value form 'next pointer' of next
-    //      else
-    //          Point the 'next pointer' to the head of next
-    //          Change 'previous pointer' of next to the head of current/previous of current
-
     const uint16_t HEAP_SIZE = 64000;
 
     uint16_t *ptr = ((uint16_t *)pointer) - 1; // ptr to header
 
-    uint16_t size = *(ptr) & ~1;
+    uint16_t size = *ptr & ~1;
     *ptr = size;
     *(ptr + (*ptr / 2) - 1) = size;
 
@@ -118,24 +102,45 @@ void my_free(void *pointer)
     uint16_t offset_from_start = (uint8_t *)ptr - (uint8_t *)start;
 
     // combine with block on the left if free
-    // 0b10101000
-    // if (offset_from_start != 2 && !(*(ptr - 1) & 1))
-    // {
-    //     // combine
-    //     // adjust offset_from_start
-    //     uint16_t *prev = ptr - (*(ptr - 1) / 2);
-    //     printf("prev: %p\n", prev);
-    // }
-
-    // combine with block on the right if free
-    if (offset_from_start + size != HEAP_SIZE)
+    if (ptr != (start + 1) && !(*(ptr - 1) & 1))
     {
-        // combine
-        // boucle
+        uint16_t prev_size = *(ptr - 1);
+        uint16_t *prev = ptr - (prev_size / 2);
+        size += prev_size;
+        *prev = size;
+        *(prev + (size / 2) - 1) = size;
+        ptr = prev;
+        offset_from_start = (uint8_t *)ptr - (uint8_t *)start;
     }
 
-    if (offset_from_start < *start)
+    // combine with block on the right if free
+    if (offset_from_start + size != HEAP_SIZE && !(*(ptr + (size / 2)) & 1))
+    {
+        uint16_t *next = ptr + (size / 2);
+        uint16_t next_size = *next;
+        size += next_size;
+        *ptr = size;
+        *(ptr + (size / 2) - 1) = size;
+    }
+
+    uint16_t *current = (uint16_t *)MY_HEAP + (*start / 2);
+    uint16_t *prev = NULL;
+
+    // We look for the previous free block
+    while (current != NULL && (uint8_t *)ptr >= (uint8_t *)current)
+    {
+        prev = current;
+        current = *(current + 1) == 0 ? NULL : current + *(current + 1) / 2;
+        // if current == NULL -> we got to the end
+    }
+
+    if (prev == NULL)
     {
         *start = offset_from_start;
     }
+    else
+    {
+        *(prev + 1) = (uint8_t *)ptr - (uint8_t *)prev;
+    }
+    *(ptr + 1) = current == NULL ? 0 : (uint8_t *)current - (uint8_t *)ptr;
 }

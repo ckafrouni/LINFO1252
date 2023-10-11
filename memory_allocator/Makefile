@@ -8,5 +8,8 @@ $(EXEC): my_malloc.c main.c
 run:
 	make && ./$(EXEC)
 
+debug:
+	make && gdb ./$(EXEC)
+
 clean:
 	rm -f *.out 
