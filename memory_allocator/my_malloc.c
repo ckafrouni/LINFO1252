@@ -41,27 +41,30 @@ void my_init()
     uint16_t *start = (uint16_t *)MY_HEAP;
     uint16_t *block = (uint16_t *)(MY_HEAP + 1 * METADATA_SIZE);
 
-    *start = METADATA_SIZE;
+    *start = METADATA_SIZE; // offset to first free block
 
     uint16_t block_size = HEAP_SIZE - 1 * METADATA_SIZE;
     *(block + 0) = block_size;                    // block size (in bytes)
-    *(block + 1) = 0;                             // ptr to next free block (here: null)
-    *(block + 2) = 0;                             // ptr to previous free block
+    *(block + 1) = 0;                             // offset to next free block (0)
+    *(block + 2) = 0;                             // offset to prev free block (0)
     *(block + (block_size / 2) - 1) = block_size; // last: = 1st
 }
 
 void *my_malloc(size_t size)
 {
-    const uint16_t WORD = 2;
-    const uint16_t MIN_BLOCK_SIZE = 4 * WORD;
-    size += 2 * WORD; // Additional words for metadata
+    const uint16_t METADATA_SIZE = 2;
+    const uint16_t MIN_BLOCK_SIZE = 4 * METADATA_SIZE;
+
+    size += 2 * METADATA_SIZE; // Additional words for metadata
+    size = size < MIN_BLOCK_SIZE ? MIN_BLOCK_SIZE : size;
 
     uint16_t *start = (uint16_t *)MY_HEAP;
+
     uint16_t *current = (uint16_t *)(MY_HEAP + *start);
 
     while (current != NULL)
     {
-        uint16_t block_size = *current;
+        uint16_t block_size = *(current + 0);
         if (block_size >= size)
         {
             uint16_t remaining_size = block_size - size;
@@ -71,15 +74,15 @@ void *my_malloc(size_t size)
             {
                 // Split block
                 new_block = current + size;
-                *new_block = remaining_size;
-                *(new_block + 1 * WORD) = *(current + 1 * WORD);
-                *(new_block + 2 * WORD) = *(current + 2 * WORD);
-                *(new_block + *new_block - WORD) = *new_block;
+                *(new_block + 0) = remaining_size;
+                *(new_block + 1) = *(current + 1); // offset to next free block
+                *(new_block + 2) = *(current + 2); // offset to prev free block
+                *(new_block + (remaining_size / 2) - 1) = remaining_size;
             }
 
             // Update current block
-            *current = size;
-            *(current + size - WORD) = size;
+            *(current + 0) = size;
+            *(current + (size / 2) - 1) = size;
 
             // Update previous block's next pointer
             // TODO
@@ -87,10 +90,10 @@ void *my_malloc(size_t size)
             // Update next block's previous pointer
             // TODO
 
-            return (void *)(current + 1 * WORD);
+            return (void *)(current + 1);
         }
 
-        current = *(current + 1 * WORD);
+        current = current + *(current + 1);
     }
 
     return NULL;
