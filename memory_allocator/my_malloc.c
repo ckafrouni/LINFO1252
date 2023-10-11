@@ -79,21 +79,9 @@ void *my_malloc(size_t size)
             *current = size;
             *(current + size - WORD) = size;
 
-            // CETTE PARTIE VIENT DE CHATGPT
             // Update previous block's next pointer
-            // uint16_t previous_offset = *(current + 2 * WORD);
-            // if (previous_offset)
-            // {
-            //     uint16_t *previous = (uint16_t *)(MY_HEAP + previous_offset);
-            //     *(previous + 1 * WORD) = (uint8_t *)new_block ? (uint8_t *)new_block - MY_HEAP : 0;
-            // }
+
             // Update next block's previous pointer
-            // uint16_t next_offset = *(current + 1 * WORD);
-            // if (next_offset)
-            // {
-            //     uint16_t *next = (uint16_t *)(MY_HEAP + next_offset);
-            //     *(next + 2 * WORD) = (uint8_t *)new_block ? (uint8_t *)new_block - MY_HEAP : 0;
-            // }
 
             return (void *)(current + 1 * WORD);
         }
