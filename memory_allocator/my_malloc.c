@@ -97,4 +97,20 @@ void *my_malloc(size_t size)
 }
 
 
-void my_free(void *pointer) {}
+void my_free(void *pointer) {
+    // Find the first previous free space
+        // if previous is adjacent => merge
+            // Change size of previous: previous += current
+            // Wait to point to next with the 'next pointer' of the previous => current becomes previous
+        // else
+            // Point to the head of previous
+            // Change 'next pointer' of previous to current
+
+    // Find the next free space
+        // if next is adjacent => merge
+            // Change size of current: current += next
+            // Change 'next pointer' of current with the value form 'next pointer' of next
+        // else
+            // Point the 'next pointer' to the head of next
+            // Change 'previous pointer' of next to the head of current/previous of current
+}
