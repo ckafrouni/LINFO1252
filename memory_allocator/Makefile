@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -ggdb
+CFLAGS=-Wall -Wextra -g -ggdb3
 EXEC=main.out
 
 $(EXEC): my_malloc.c main.c
