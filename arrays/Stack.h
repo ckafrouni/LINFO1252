@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#define INIT_CAPACITY 16
-
 typedef struct stack_t
 {
     void *stack;
@@ -17,7 +15,9 @@ typedef struct stack_t
     size_t top;
 } stack_t;
 
-stack_t create_stack(size_t elem_size);
+stack_t *create_stack(size_t elem_size);
+
+void free_stack(stack_t *stack);
 
 int is_empty(stack_t *stack);
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "stack.h"
+#include "Stack.h"
 
 void print_int(void *data)
 {
@@ -14,20 +14,38 @@ void print(stack_t *stack)
 
 int main()
 {
-    stack_t stack = create_stack(sizeof(int));
+    stack_t *stack = create_stack(sizeof(int));
 
-    int val1 = 1, val2 = 2, val3 = 3;
-    push(&stack, &val1);
-    print(&stack);
+    int *v1 = (int *)malloc(sizeof(int));
+    int *v2 = (int *)malloc(sizeof(int));
+    int *v3 = (int *)malloc(sizeof(int));
 
-    push(&stack, &val2);
-    print(&stack);
+    *v1 = 1;
+    *v2 = 2;
+    *v3 = 3;
 
-    push(&stack, &val3);
+    push(stack, v1);
+    print(stack);
 
-    print(&stack);
+    push(stack, v2);
+    print(stack);
+
+    push(stack, v3);
+
+    print(stack);
+
+    int *vx = pop(stack);
+    printf("Popped: %d\n", *vx);
+    print(stack);
+
+    // pop(stack);
+    // print(stack);
+
+    // pop(stack);
+    // print(stack);
 
     // Don't forget to free the stack memory
-    free(stack.stack);
+    free(vx);
+    free_stack(stack);
     return 0;
 }

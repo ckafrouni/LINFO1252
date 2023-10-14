@@ -4,22 +4,35 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "stack.h"
+#include "Stack.h"
 
-stack_t create_stack(size_t elem_size)
+#define INIT_CAPACITY 16
+
+stack_t *create_stack(size_t elem_size)
 {
-    stack_t stack = {
-        .stack = malloc(elem_size * INIT_CAPACITY),
-        .elem_size = elem_size,
-        .capacity = INIT_CAPACITY,
-        .top = 0};
 
-    if (stack.stack == NULL)
+    stack_t *stack = (stack_t *)malloc(sizeof(stack_t));
+    if (stack == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+    stack->capacity = INIT_CAPACITY;
+    stack->elem_size = elem_size;
+    stack->top = 0;
+
+    stack->stack = malloc(elem_size * INIT_CAPACITY);
+    if (stack->stack == NULL)
     {
         exit(EXIT_FAILURE);
     }
 
     return stack;
+}
+
+void free_stack(stack_t *stack)
+{
+    free(stack->stack);
+    free(stack);
 }
 
 int is_empty(stack_t *stack)
