@@ -7,13 +7,7 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef struct stack_t
-{
-    void *stack;
-    size_t elem_size;
-    size_t capacity;
-    size_t top;
-} stack_t;
+typedef struct stack_t stack_t;
 
 stack_t *create_stack(size_t elem_size);
 

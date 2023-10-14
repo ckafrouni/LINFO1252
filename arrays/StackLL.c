@@ -12,6 +12,12 @@ typedef struct node_t
     struct node_t *next;
 } node_t;
 
+struct stack_t {
+    node_t *node;
+    size_t elem_size;
+    size_t top;
+};
+
 stack_t *create_stack(size_t elem_size)
 {
     stack_t *stack = (stack_t *)malloc(sizeof(stack_t));
@@ -28,7 +34,7 @@ stack_t *create_stack(size_t elem_size)
     node->next = NULL;
     node->value = NULL;
 
-    stack->stack = node;    
+    stack->node = node;    
     stack->elem_size = elem_size;
     stack->top = 0;
 
@@ -37,7 +43,7 @@ stack_t *create_stack(size_t elem_size)
 
 void free_stack(stack_t *stack)
 {
-    free_node(stack->stack);
+    free_node(stack->node);
     free(stack);
 }
 
@@ -60,8 +66,8 @@ int is_empty(stack_t *stack)
 void push(stack_t *stack, void *value)
 {
     node_t *node = (node_t *)malloc(sizeof(node_t));
-    node->next = stack->stack;
-    stack->stack = node;
+    node->next = stack->node;
+    stack->node = node;
 
     node->value = value;
     stack->top++;
@@ -76,9 +82,9 @@ void *pop(stack_t *stack)
 
     stack->top--;
 
-    node_t *node = (node_t *)stack->stack;
+    node_t *node = (node_t *)stack->node;
     void *ret_val = node->value;
-    stack->stack = node->next;
+    stack->node = node->next;
 
     free(node);
 
@@ -90,7 +96,7 @@ void print_stack(stack_t *stack, void (*print_func)(void *))
 {
     printf("\033[1m");
 
-    node_t *cursor = (node_t *)stack->stack;
+    node_t *cursor = (node_t *)stack->node;
     for (size_t i = 0; i < stack->top; ++i)
     {
         void *elem = cursor->value;

@@ -8,6 +8,14 @@
 
 #define INIT_CAPACITY 16
 
+struct stack_t {
+    void *stack;
+    size_t elem_size;
+    size_t capacity;
+    size_t top;
+};
+
+
 stack_t *create_stack(size_t elem_size)
 {
 
@@ -20,7 +28,7 @@ stack_t *create_stack(size_t elem_size)
     stack->elem_size = elem_size;
     stack->top = 0;
 
-    stack->stack = malloc(elem_size * INIT_CAPACITY);
+    stack->stack = malloc(sizeof(char *) * INIT_CAPACITY);
     if (stack->stack == NULL)
     {
         exit(EXIT_FAILURE);
@@ -45,7 +53,7 @@ void push(stack_t *stack, void *value)
     if (stack->capacity == stack->top)
     {
         stack->capacity *= 2;
-        stack->stack = realloc(stack->stack, stack->capacity * stack->elem_size);
+        stack->stack = realloc(stack->stack, stack->capacity * sizeof(char *));
 
         if (stack->stack == NULL)
         {
@@ -53,7 +61,7 @@ void push(stack_t *stack, void *value)
         }
     }
 
-    memcpy((char *)stack->stack + stack->elem_size * stack->top, value, stack->elem_size);
+    ((char *)stack->stack)[stack->top * sizeof(char *)] = (char *)value;
     stack->top++;
 }
 
@@ -72,7 +80,6 @@ void *pop(stack_t *stack)
         exit(EXIT_FAILURE);
     }
 
-    memcpy(ret_val, (char *)stack->stack + stack->top * stack->elem_size, stack->elem_size);
     return ret_val;
 }
 
@@ -83,7 +90,7 @@ void print_stack(stack_t *stack, void (*print_func)(void *))
 
     for (size_t i = 0; i < stack->top; ++i)
     {
-        void *elem = (char *)stack->stack + i * stack->elem_size;
+        void *elem = (char *)stack->stack + i * sizeof(char *);
         printf("| ");
         print_func(elem); // Call the print function
         printf(" ");
